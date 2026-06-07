@@ -114,14 +114,35 @@ $volunteers = $stmt->fetchAll();
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="stat-card">
-                                <div class="stat-content">
-                                    <h6>Contacted</h6>
-                                    <h3><?php echo count(array_filter($volunteers, fn($v) => $v['status'] === 'contacted')); ?></h3>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- New -->
+<div class="col-md-6">
+    <div class="stat-card">
+        <div class="stat-content">
+            <h6>New</h6>
+            <h3><?php echo count(array_filter($volunteers, fn($v) => $v['status'] === 'new')); ?></h3>
+        </div>
+    </div>
+</div>
+
+<!-- Accepted -->
+<div class="col-md-6">
+    <div class="stat-card">
+        <div class="stat-content">
+            <h6>Accepted</h6>
+            <h3><?php echo count(array_filter($volunteers, fn($v) => $v['status'] === 'accepted')); ?></h3>
+        </div>
+    </div>
+</div>
+
+<!-- Declined -->
+<div class="col-md-6">
+    <div class="stat-card">
+        <div class="stat-content">
+            <h6>Declined</h6>
+            <h3><?php echo count(array_filter($volunteers, fn($v) => $v['status'] === 'declined')); ?></h3>
+        </div>
+    </div>
+</div>
                     </div>
 
                     <!-- Filters -->
