@@ -15,7 +15,7 @@
 - [ ] Verify new columns added to existing tables
 
 ## File Installation
-- [ ] All files created in `/admin/` directory:
+- [ ] All files in `/admin/` directory:
   - [ ] login.php
   - [ ] dashboard.php
   - [ ] donations.php
@@ -29,10 +29,10 @@
   - [ ] send_email.php
   - [ ] README.md
 
-- [ ] CSS file created: `/admin/css/admin-style.css`
-- [ ] JavaScript file created: `/admin/js/admin-script.js`
+- [ ] CSS file`/admin/css/admin-style.css`
+- [ ] JavaScript file  `/admin/js/admin-script.js`
 
-- [ ] Handler files created in `/admin/handlers/`:
+- [ ] Handler files in `/admin/handlers/`:
   - [ ] update_donation.php
   - [ ] delete_donation.php
   - [ ] update_volunteer.php
@@ -42,7 +42,7 @@
   - [ ] delete_subscriber.php
   - [ ] export_csv.php
 
-- [ ] Migration file created: `/DB/admin_migration.sql`
+- [ ] Migration file : `/DB/admin_migration.sql`
 
 ## Configuration
 - [ ] Update database credentials in `/admin/config.php` if needed
@@ -109,27 +109,6 @@
 - [ ] Should redirect to login.php
 - [ ] Session timeout works (wait 1 hour or modify SESSION_TIMEOUT)
 
-## Optional Enhancements
-- [ ] Update demo credentials to new admin account
-- [ ] Change APP_NAME in config.php
-- [ ] Customize email templates in send_email.php
-- [ ] Set up SMTP for email delivery
-- [ ] Configure backups
-
-## Documentation
-- [ ] Read /admin/README.md
-- [ ] Understand file structure
-- [ ] Know how to change password
-- [ ] Know how to backup database
-
-## Deployment Checklist
-- [ ] If going to production:
-  - [ ] Change default admin password
-  - [ ] Set `display_errors` to 0
-  - [ ] Update database credentials
-  - [ ] Enable HTTPS
-  - [ ] Set up automated backups
-  - [ ] Configure SMTP for emails
 
 ## Support Resources
 
@@ -163,7 +142,7 @@ SELECT
 ```
 
 ### Browser Console Errors
-- Open Developer Tools (F12)
+- Open/Enable Developer Tools (F12)
 - Check Console for JavaScript errors
 - Check Network tab for failed requests
 

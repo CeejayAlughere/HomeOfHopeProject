@@ -1,6 +1,6 @@
 # Home Of Hope Website
 
-A charity website for the Home Of Hope initiative, built with PHP, HTML, CSS, JavaScript, and MySQL.
+A non-government organisation website for the Home Of Hope initiative, built with PHP, HTML, CSS, JavaScript, and MySQL.
 
 ## Overview
 
@@ -29,7 +29,7 @@ This website provides information about the organization, its causes, events, se
 - `img/` — image assets
 - `DB/homeofhope.sql` — database schema and initial data
 
-## Requirements
+## Pre-Requirements
 
 - PHP 7.4+ or compatible PHP runtime
 - MySQL / MariaDB
