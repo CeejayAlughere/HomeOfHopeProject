@@ -12,16 +12,18 @@ $statusFilter = $_GET['status'] ?? '';
 $searchQuery = $_GET['search'] ?? '';
 
 // Build query
-$query = 'SELECT * FROM donations WHERE 1=1';
+$query = 'SELECT donations.*, users.full_name AS member_full_name, users.sa_id AS member_sa_id FROM donations LEFT JOIN users ON donations.user_id = users.id WHERE 1=1';
 $params = [];
 
 if (!empty($statusFilter)) {
-    $query .= ' AND status = ?';
+    $query .= ' AND donations.status = ?';
     $params[] = $statusFilter;
 }
 
 if (!empty($searchQuery)) {
-    $query .= ' AND (name LIKE ? OR email LIKE ?)';
+    $query .= ' AND (donations.name LIKE ? OR donations.email LIKE ? OR users.full_name LIKE ? OR users.sa_id LIKE ?)';
+    $params[] = '%' . $searchQuery . '%';
+    $params[] = '%' . $searchQuery . '%';
     $params[] = '%' . $searchQuery . '%';
     $params[] = '%' . $searchQuery . '%';
 }
@@ -164,7 +166,8 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
+                                            <th>Member Name</th>
+                                            <th>Member ID</th>
                                             <th>Email</th>
                                             <th>Amount</th>
                                             <th>Status</th>
@@ -177,7 +180,8 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                                         <?php foreach ($donations as $donation): ?>
                                             <tr>
                                                 <td>#<?php echo $donation['id']; ?></td>
-                                                <td><?php echo htmlspecialchars($donation['name']); ?></td>
+                                                <td><?php echo htmlspecialchars($donation['member_full_name'] ?: $donation['name']); ?></td>
+                                                <td><?php echo htmlspecialchars($donation['member_sa_id'] ?: '-'); ?></td>
                                                 <td><?php echo htmlspecialchars($donation['email']); ?></td>
                                                 <td><strong><?php echo formatCurrency($donation['amount']); ?></strong></td>
                                                 <td><?php echo getStatusBadge($donation['status']); ?></td>

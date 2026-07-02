@@ -17,6 +17,7 @@ function getPDO() {
         $pdo = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8", $dbUser, $dbPass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         ensureUserTable($pdo);
+        ensureUserColumns($pdo);
         ensureDonationColumns($pdo);
         return $pdo;
     } catch (PDOException $e) {
@@ -30,9 +31,17 @@ function ensureUserTable(PDO $pdo) {
         `full_name` varchar(150) NOT NULL,
         `sa_id` varchar(13) NOT NULL,
         `username` varchar(100) NOT NULL UNIQUE,
+        `email` varchar(150) NOT NULL,
         `password_hash` varchar(255) NOT NULL,
         `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+}
+
+function ensureUserColumns(PDO $pdo) {
+    $column = $pdo->query("SHOW COLUMNS FROM users LIKE 'email'")->fetch(PDO::FETCH_ASSOC);
+    if (!$column) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN email varchar(150) NOT NULL AFTER username");
+    }
 }
 
 function ensureDonationColumns(PDO $pdo) {
@@ -72,7 +81,7 @@ function getCurrentUser() {
     }
 
     try {
-        $stmt = getPDO()->prepare('SELECT id, full_name, username FROM users WHERE id = ?');
+        $stmt = getPDO()->prepare('SELECT id, full_name, username, email FROM users WHERE id = ?');
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -97,7 +106,7 @@ function findUserByUsername($username) {
     }
 }
 
-function createUser($fullName, $saId, $username, $passwordHash) {
-    $stmt = getPDO()->prepare('INSERT INTO users (full_name, sa_id, username, password_hash) VALUES (?, ?, ?, ?)');
-    return $stmt->execute([$fullName, $saId, $username, $passwordHash]);
+function createUser($fullName, $saId, $username, $email, $passwordHash) {
+    $stmt = getPDO()->prepare('INSERT INTO users (full_name, sa_id, username, email, password_hash) VALUES (?, ?, ?, ?, ?)');
+    return $stmt->execute([$fullName, $saId, $username, $email, $passwordHash]);
 }

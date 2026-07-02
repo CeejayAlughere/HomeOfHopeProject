@@ -20,9 +20,9 @@ try {
     // Fetch data based on table
     switch ($table) {
         case 'donations':
-            $stmt = $pdo->query('SELECT id, name, email, amount, status, notes, donated_at FROM donations ORDER BY donated_at DESC');
+            $stmt = $pdo->query('SELECT donations.id, donations.name, donations.email, donations.amount, donations.status, donations.notes, donations.donated_at, users.full_name AS member_full_name, users.sa_id AS member_sa_id FROM donations LEFT JOIN users ON donations.user_id = users.id ORDER BY donations.donated_at DESC');
             $data = $stmt->fetchAll();
-            $headers = ['ID', 'Name', 'Email', 'Amount', 'Status', 'Notes', 'Donation Date'];
+            $headers = ['ID', 'Member Name', 'Member ID Number', 'Contact Email', 'Donation Amount', 'Status', 'Notes', 'Donation Date'];
             $filename = 'donations_' . date('Y-m-d_His') . '.csv';
             
             // Convert to CSV format
@@ -30,7 +30,8 @@ try {
             foreach ($data as $row) {
                 $csvData[] = [
                     $row['id'],
-                    $row['name'],
+                    $row['member_full_name'] ?: $row['name'],
+                    $row['member_sa_id'] ?: '',
                     $row['email'],
                     $row['amount'],
                     $row['status'],

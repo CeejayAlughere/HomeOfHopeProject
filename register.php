@@ -10,20 +10,26 @@ $errors = [];
 $fullName = '';
 $saId = '';
 $username = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullName = sanitize($_POST['full_name'] ?? '');
     $saId = sanitize($_POST['sa_id'] ?? '');
     $username = sanitize($_POST['username'] ?? '');
+    $email = sanitize($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    if (!$fullName || !$saId || !$username || !$password || !$confirmPassword) {
+    if (!$fullName || !$saId || !$username || !$email || !$password || !$confirmPassword) {
         $errors[] = 'Please complete all fields.';
     }
 
     if ($saId && !preg_match('/^\d{13}$/', $saId)) {
         $errors[] = 'South African ID Number must contain exactly 13 digits.';
+    }
+
+    if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Please provide a valid email address.';
     }
 
     if ($password !== $confirmPassword) {
@@ -37,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        if (createUser($fullName, $saId, $username, $passwordHash)) {
+        if (createUser($fullName, $saId, $username, $email, $passwordHash)) {
             header('Location: login.php?registered=1');
             exit;
         }
@@ -130,6 +136,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label>Username</label>
                                 <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($username); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
                             </div>
                             <div class="form-group">
                                 <label>Password</label>

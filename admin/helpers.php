@@ -126,26 +126,52 @@ function validateEmail($email) {
 }
 
 /**
+ * Check whether a column exists in a table
+ */
+function columnExists(PDO $pdo, $table, $column) {
+    $stmt = $pdo->prepare('SHOW COLUMNS FROM ' . $table . ' LIKE ?');
+    $stmt->execute([$column]);
+    return (bool) $stmt->fetch();
+}
+
+/**
  * Get database statistics
  */
 function getDatabaseStats() {
     try {
         $pdo = getDBConnection();
         
-        $stats = [
-            'total_donations' => $pdo->query('SELECT COUNT(*) as count FROM donations')->fetch()['count'],
-            'total_amount' => $pdo->query('SELECT SUM(amount) as total FROM donations')->fetch()['total'],
-            'total_volunteers' => $pdo->query('SELECT COUNT(*) as count FROM volunteers')->fetch()['count'],
-            'total_contacts' => $pdo->query('SELECT COUNT(*) as count FROM contact_messages')->fetch()['count'],
-            'total_subscribers' => $pdo->query('SELECT COUNT(*) as count FROM newsletter_subscribers')->fetch()['count'],
-            'verified_donations' => $pdo->query('SELECT COUNT(*) as count FROM donations WHERE status = "verified"')->fetch()['count'],
-            'contacted_volunteers' => $pdo->query('SELECT COUNT(*) as count FROM volunteers WHERE status = "contacted"')->fetch()['count']
+        $totalDonations = $pdo->query('SELECT COUNT(*) as count FROM donations')->fetch()['count'] ?? 0;
+        $totalAmount = $pdo->query('SELECT SUM(amount) as total FROM donations')->fetch()['total'] ?? 0;
+        $totalVolunteers = $pdo->query('SELECT COUNT(*) as count FROM volunteers')->fetch()['count'] ?? 0;
+        $totalContacts = $pdo->query('SELECT COUNT(*) as count FROM contact_messages')->fetch()['count'] ?? 0;
+        $totalSubscribers = $pdo->query('SELECT COUNT(*) as count FROM newsletter_subscribers')->fetch()['count'] ?? 0;
+        $verifiedDonations = 0;
+
+        if (columnExists($pdo, 'donations', 'status')) {
+            $verifiedDonations = $pdo->query('SELECT COUNT(*) as count FROM donations WHERE status = "verified"')->fetch()['count'] ?? 0;
+        }
+
+        return [
+            'total_donations' => (int) $totalDonations,
+            'total_amount' => $totalAmount !== null ? $totalAmount : 0,
+            'total_volunteers' => (int) $totalVolunteers,
+            'total_contacts' => (int) $totalContacts,
+            'total_subscribers' => (int) $totalSubscribers,
+            'verified_donations' => (int) $verifiedDonations,
+            'contacted_volunteers' => (int) ($pdo->query('SELECT COUNT(*) as count FROM volunteers WHERE status = "contacted"')->fetch()['count'] ?? 0)
         ];
-        
-        return $stats;
     } catch (PDOException $e) {
         error_log('Stats query error: ' . $e->getMessage());
-        return [];
+        return [
+            'total_donations' => 0,
+            'total_amount' => 0,
+            'total_volunteers' => 0,
+            'total_contacts' => 0,
+            'total_subscribers' => 0,
+            'verified_donations' => 0,
+            'contacted_volunteers' => 0
+        ];
     }
 }
 
@@ -157,13 +183,14 @@ function getRecentSubmissions($limit = 5) {
         $pdo = getDBConnection();
         
         $stmt = $pdo->prepare('
-            SELECT "donation" as type, id, name, email, DATE(donated_at) as date, amount as data, status 
+            SELECT "donation" as type, donations.id, donations.name, donations.email, DATE(donations.donated_at) as date, donations.amount as data, donations.status, users.full_name as member_full_name, users.sa_id as member_sa_id 
             FROM donations 
+            LEFT JOIN users ON donations.user_id = users.id 
             UNION ALL
-            SELECT "volunteer" as type, id, name, email, DATE(signed_up_at) as date, reason as data, status 
+            SELECT "volunteer" as type, id, name, email, DATE(signed_up_at) as date, reason as data, status, NULL as member_full_name, NULL as member_sa_id 
             FROM volunteers 
             UNION ALL
-            SELECT "contact" as type, id, name, email, DATE(submitted_at) as date, subject as data, NULL as status 
+            SELECT "contact" as type, id, name, email, DATE(submitted_at) as date, subject as data, NULL as status, NULL as member_full_name, NULL as member_sa_id 
             FROM contact_messages 
             ORDER BY date DESC 
             LIMIT ?

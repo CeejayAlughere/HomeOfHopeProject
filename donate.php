@@ -65,6 +65,7 @@ if (isLoggedIn()) {
                         </div>
                     </div>
                     <a href="contact.php" class="nav-item nav-link">Contact</a>
+                    <a href="login.php" class="nav-item nav-link btn btn-custom text-white ml-3" style="margin-left: 15px;">Member</a>
                 </div>
             </div>
         </div>
@@ -91,7 +92,7 @@ if (isLoggedIn()) {
                                 <a href="register.php" class="btn btn-custom btn-block">Register</a>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <a href="login.php" class="btn btn-secondary btn-block">Login</a>
+                                <a href="login.php" class="btn btn-custom btn-block">Login</a>
                             </div>
                         </div>
                         <hr>

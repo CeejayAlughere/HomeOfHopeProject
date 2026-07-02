@@ -75,61 +75,6 @@ $recentSubmissions = getRecentSubmissions(6);
                         <i class="fas fa-chart-line"></i> Dashboard
                     </h1>
 
-                    <!-- Stats Grid -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 mb-3">
-                            <div class="stat-card">
-                                <div class="stat-icon bg-success">
-                                    <i class="fas fa-donate"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <h6>Total Donations</h6>
-                                    <h3><?php echo $stats['total_donations']; ?></h3>
-                                    <small class="text-muted">Amount: <?php echo formatCurrency($stats['total_amount']); ?></small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="stat-card">
-                                <div class="stat-icon bg-info">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <h6>Verified Donations</h6>
-                                    <h3><?php echo $stats['verified_donations']; ?></h3>
-                                    <small class="text-muted"><?php echo round(($stats['verified_donations']/$stats['total_donations'])*100, 1); ?>% of total</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="stat-card">
-                                <div class="stat-icon bg-primary">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <h6>Total Volunteers</h6>
-                                    <h3><?php echo $stats['total_volunteers']; ?></h3>
-                                    <small class="text-muted"><?php echo $stats['contacted_volunteers']; ?> contacted</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="stat-card">
-                                <div class="stat-icon bg-warning">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <h6>Submissions</h6>
-                                    <h3><?php echo $stats['total_contacts']; ?></h3>
-                                    <small class="text-muted"><?php echo $stats['total_subscribers']; ?> subscribers</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Recent Submissions Table -->
                     <div class="card">
                         <div class="card-header bg-light">

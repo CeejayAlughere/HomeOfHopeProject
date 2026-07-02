@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/admin-style.css">
     <style>
         body {
-            background: linear-gradient(135deg, #dbdf00 0%, #195eff 100%);
+            background: linear-gradient(135deg, #dbdf00 0%, #5009e0 100%);
             display: flex;
             align-items: center;
             justify-content: center;
