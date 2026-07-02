@@ -70,10 +70,10 @@ $user = getCurrentUser();
                                 <a href="donation.php" class="btn btn-custom btn-block">Donate</a>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <a href="donation_history.php" class="btn btn-secondary btn-block">Donation History</a>
+                                <a href="donation_history.php" class="btn btn-custom btn-block">Donation History</a>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <a href="logout.php" class="btn btn-outline-dark btn-block">Logout</a>
+                                <a href="logout.php" class="btn btn-custom btn-block">Logout</a>
                             </div>
                         </div>
                     </div>

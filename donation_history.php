@@ -115,8 +115,8 @@ try {
                         <?php endif; ?>
 
                         <div class="mt-4">
-                            <a href="dashboard.php" class="btn btn-secondary">Back to dashboard</a>
-                            <a href="logout.php" class="btn btn-outline-dark">Logout</a>
+                            <a href="dashboard.php" class="btn btn-custom btn-block">Back to dashboard</a>
+                            <a href="logout.php" class="btn btn-custom btn-block">Logout</a>
                         </div>
                     </div>
                 </div>

@@ -111,8 +111,8 @@ $errorMessage = $_GET['error'] ?? '';
                         </form>
 
                         <div class="mt-4">
-                            <a href="dashboard.php" class="btn btn-secondary">Back to dashboard</a>
-                            <a href="donation_history.php" class="btn btn-outline-dark">View Donation History</a>
+                            <a href="dashboard.php" class="btn btn-custom btn-block">Back to dashboard</a>
+                            <a href="donation_history.php" class="btn btn-custom btn-block">View Donation History</a>
                         </div>
                     </div>
                 </div>
