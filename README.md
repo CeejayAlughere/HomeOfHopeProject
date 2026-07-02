@@ -68,4 +68,3 @@ http://localhost/HomeOfHopeProject/index.php
 - Donation submissions are recorded in the `donations` table.
 - Newsletter signups are stored in `newsletter_subscribers`.
 - If external CSS or JS libraries are unavailable, consider downloading them locally or switching to newer CDN URLs.
-
