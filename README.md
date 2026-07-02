@@ -33,7 +33,7 @@ This website provides information about the organization, its causes, events, se
 
 - PHP 7.4+ or compatible PHP runtime
 - MySQL / MariaDB
-- XAMPP, WAMP, or another local PHP development stack
+- XAMPP local PHP development stack
 - Internet access for external CSS/JS libraries used in the page templates
 
 ## Local Setup
@@ -69,6 +69,3 @@ http://localhost/HomeOfHopeProject/index.php
 - Newsletter signups are stored in `newsletter_subscribers`.
 - If external CSS or JS libraries are unavailable, consider downloading them locally or switching to newer CDN URLs.
 
-## Contact
-
-For questions or improvements, update the site files in this repository.
