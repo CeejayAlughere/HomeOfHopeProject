@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <form method="POST" action="">
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
+                <label for="username" class="form-label">Username or Email</label>
                 <input 
                     type="text" 
                     class="form-control" 

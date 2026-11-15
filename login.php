@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!$username || !$password) {
-        $errors[] = 'Please enter both username and password.';
+        $errors[] = 'Please enter both username/email and password.';
     }
 
     if (empty($errors)) {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $errors[] = 'Invalid username or password.';
+        $errors[] = 'Invalid username/email or password.';
     }
 }
 ?>
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <form method="POST" action="login.php">
                             <div class="form-group">
-                                <label>Username</label>
+                                <label>Username/Email</label>
                                 <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($username); ?>" required>
                             </div>
                             <div class="form-group">
