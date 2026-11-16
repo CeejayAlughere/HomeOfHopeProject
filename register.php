@@ -152,6 +152,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <button type="submit" class="btn btn-custom btn-block">Register</button>
                         </form>
 
+                        <?php require __DIR__ . '/includes/google_signin_form.php'; ?>
+
                         <div class="mt-3 text-center">
                             Already registered? <a href="login.php">Login here</a>.
                         </div>

@@ -84,7 +84,7 @@ try {
                         </div>
 
                         <?php if (isset($_GET['donated']) && $_GET['donated'] == '1'): ?>
-                            <div class="alert alert-success">Your donation was successful. Thank you for your support.</div>
+                            <div class="alert alert-success">Your donation was recorded. No payment was processed.</div>
                         <?php endif; ?>
 
                         <?php if (empty($donations)): ?>

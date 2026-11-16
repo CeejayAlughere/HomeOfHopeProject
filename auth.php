@@ -76,12 +76,8 @@ function getCurrentUser() {
         return null;
     }
 
-    if (isset($_SESSION['user'])) {
-        return $_SESSION['user'];
-    }
-
     try {
-        $stmt = getPDO()->prepare('SELECT id, full_name, username, email FROM users WHERE id = ?');
+        $stmt = getPDO()->prepare('SELECT id, full_name, username, email, phone_number FROM users WHERE id = ?');
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

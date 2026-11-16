@@ -26,11 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = findUserByUsername($username);
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'full_name' => $user['full_name'],
                 'username' => $user['username'],
+                'email' => $user['email'],
             ];
             header('Location: dashboard.php');
             exit;
@@ -127,6 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <button type="submit" class="btn btn-custom btn-block">Login</button>
                         </form>
+
+                        <?php require __DIR__ . '/includes/google_signin_form.php'; ?>
 
                         <div class="mt-3 text-center">
                             Don't have an account? <a href="register.php">Register here</a>.

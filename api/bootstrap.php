@@ -91,7 +91,18 @@ function issueApiToken(PDO $pdo, int $userId): string
 
 function getBearerToken(): ?string
 {
-    $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $authorization = $_SERVER['HTTP_AUTHORIZATION']
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+        ?? '';
+
+    if ($authorization === '' && function_exists('getallheaders')) {
+        foreach (getallheaders() as $name => $value) {
+            if (strcasecmp($name, 'Authorization') === 0) {
+                $authorization = (string) $value;
+                break;
+            }
+        }
+    }
 
     if (!preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
         return null;
@@ -99,6 +110,44 @@ function getBearerToken(): ?string
 
     $token = trim($matches[1]);
     return $token !== '' ? $token : null;
+}
+
+function requireAuthenticatedUser(PDO $pdo): array
+{
+    $plainToken = getBearerToken();
+
+    if ($plainToken === null) {
+        sendJson(401, [
+            'success' => false,
+            'message' => 'Please log in before continuing.'
+        ]);
+    }
+
+    $tokenHash = hash('sha256', $plainToken);
+    $stmt = $pdo->prepare(
+        'SELECT u.*
+         FROM api_tokens t
+         INNER JOIN users u ON u.id = t.user_id
+         WHERE t.token_hash = ?
+           AND t.expires_at > NOW()
+         LIMIT 1'
+    );
+    $stmt->execute([$tokenHash]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        sendJson(401, [
+            'success' => false,
+            'message' => 'Your login session has expired. Please log in again.'
+        ]);
+    }
+
+    $touch = $pdo->prepare(
+        'UPDATE api_tokens SET last_used_at = NOW() WHERE token_hash = ?'
+    );
+    $touch->execute([$tokenHash]);
+
+    return $user;
 }
 
 function revokeApiToken(PDO $pdo, string $plainToken): void
@@ -134,6 +183,7 @@ function userPayload(array $user): array
         'idNumber' => (string) $user['sa_id'],
         'username' => (string) $user['username'],
         'email' => (string) $user['email'],
+        'phoneNumber' => (string) ($user['phone_number'] ?? ''),
         'memberNumber' => 'HOH-' . str_pad(
             (string) $user['id'],
             6,

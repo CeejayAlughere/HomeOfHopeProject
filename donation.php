@@ -1,9 +1,30 @@
 <?php
 require_once 'auth.php';
+require_once 'cause_repository.php';
+
+$requestedCauseId = filter_input(INPUT_GET, 'cause_id', FILTER_VALIDATE_INT);
+if ($requestedCauseId && $requestedCauseId > 0) {
+    $_SESSION['pending_cause_id'] = (int) $requestedCauseId;
+}
+
 requireLogin();
 $user = getCurrentUser();
 
 $errorMessage = $_GET['error'] ?? '';
+$causes = [];
+$selectedCauseId = (int) ($_SESSION['pending_cause_id'] ?? 0);
+
+try {
+    $causes = fetchActiveCauses(getPDO());
+    $validCauseIds = array_column($causes, 'id');
+    if (!in_array($selectedCauseId, $validCauseIds, true)) {
+        $selectedCauseId = 0;
+        unset($_SESSION['pending_cause_id']);
+    }
+} catch (Throwable $e) {
+    error_log('Donation form causes error: ' . $e->getMessage());
+    $errorMessage = 'Unable to load the available causes. Please try again.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,28 +88,37 @@ $errorMessage = $_GET['error'] ?? '';
                     <div class="card-body p-4">
                         <h3 class="mb-4">Make a donation</h3>
 
+                        <div class="alert alert-info">
+                            Your donation record will be added to the cause total. No payment is processed in this version.
+                        </div>
+
                         <?php if ($errorMessage): ?>
                             <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage); ?></div>
                         <?php endif; ?>
 
                         <form action="donate_handler.php" method="POST">
                             <div class="form-group">
-                                <label>Cardholder Name</label>
-                                <input type="text" name="cardholder_name" class="form-control" required>
+                                <label>Member</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="<?php echo htmlspecialchars($user['full_name'] ?? $user['username'] ?? ''); ?>"
+                                    readonly
+                                >
                             </div>
                             <div class="form-group">
-                                <label>Card Number</label>
-                                <input type="text" name="card_number" class="form-control" maxlength="19" placeholder="0000 0000 0000 0000" required>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label>Expiry Date</label>
-                                    <input type="text" name="expiry_date" class="form-control" placeholder="MM/YY" required>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label>CVV</label>
-                                    <input type="text" name="cvv" class="form-control" maxlength="4" required>
-                                </div>
+                                <label>Cause</label>
+                                <select name="cause_id" class="form-control" required>
+                                    <option value="">Select a cause</option>
+                                    <?php foreach ($causes as $cause): ?>
+                                        <option
+                                            value="<?php echo (int) $cause['id']; ?>"
+                                            <?php echo $selectedCauseId === (int) $cause['id'] ? 'selected' : ''; ?>
+                                        >
+                                            <?php echo htmlspecialchars($cause['title']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>South African Bank</label>
@@ -105,9 +135,9 @@ $errorMessage = $_GET['error'] ?? '';
                             </div>
                             <div class="form-group">
                                 <label>Donation Amount (ZAR)</label>
-                                <input type="number" min="1" step="0.01" name="amount" class="form-control" required>
+                                <input type="number" min="1" max="1000000" step="0.01" name="amount" class="form-control" required>
                             </div>
-                            <button type="submit" class="btn btn-custom">Submit Donation</button>
+                            <button type="submit" class="btn btn-custom" <?php echo empty($causes) ? 'disabled' : ''; ?>>Submit Donation</button>
                         </form>
 
                         <div class="mt-4">
