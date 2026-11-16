@@ -8,20 +8,19 @@ AdminAuth::requireLogin();
 $pdo = getDBConnection();
 
 // Get filter values
-$statusFilter = $_GET['status'] ?? '';
 $searchQuery = $_GET['search'] ?? '';
 
 // Build query
-$query = 'SELECT donations.*, users.full_name AS member_full_name, users.sa_id AS member_sa_id FROM donations LEFT JOIN users ON donations.user_id = users.id WHERE 1=1';
+$query = 'SELECT donations.*, users.full_name AS member_full_name, users.sa_id AS member_sa_id, causes.title AS cause_title
+          FROM donations
+          LEFT JOIN users ON donations.user_id = users.id
+          LEFT JOIN causes ON donations.cause_id = causes.id
+          WHERE 1=1';
 $params = [];
 
-if (!empty($statusFilter)) {
-    $query .= ' AND donations.status = ?';
-    $params[] = $statusFilter;
-}
-
 if (!empty($searchQuery)) {
-    $query .= ' AND (donations.name LIKE ? OR donations.email LIKE ? OR users.full_name LIKE ? OR users.sa_id LIKE ?)';
+    $query .= ' AND (donations.name LIKE ? OR donations.email LIKE ? OR users.full_name LIKE ? OR users.sa_id LIKE ? OR causes.title LIKE ?)';
+    $params[] = '%' . $searchQuery . '%';
     $params[] = '%' . $searchQuery . '%';
     $params[] = '%' . $searchQuery . '%';
     $params[] = '%' . $searchQuery . '%';
@@ -33,6 +32,10 @@ $query .= ' ORDER BY donated_at DESC';
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $donations = $stmt->fetchAll();
+
+$causes = $pdo->query(
+    'SELECT id, title FROM causes WHERE is_active = 1 ORDER BY display_order, title'
+)->fetchAll();
 
 $totalAmount = array_sum(array_column($donations, 'amount'));
 ?>
@@ -98,7 +101,7 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
             <div class="col-lg-10">
                 <div class="content-area">
                     <?php displayAlert(); ?>
-                    
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1 class="page-title">
                             <i class="fas fa-donate"></i> Donations
@@ -133,20 +136,13 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                         <div class="card-body">
                             <form method="GET" class="row g-3">
                                 <div class="col-md-4">
-                                    <input 
-                                        type="text" 
-                                        name="search" 
-                                        class="form-control" 
+                                    <input
+                                        type="text"
+                                        name="search"
+                                        class="form-control"
                                         placeholder="Search by name or email"
                                         value="<?php echo htmlspecialchars($searchQuery); ?>"
                                     >
-                                </div>
-                                <div class="col-md-3">
-                                    <select name="status" class="form-select">
-                                        <option value="">All Status</option>
-                                        <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="verified" <?php echo $statusFilter === 'verified' ? 'selected' : ''; ?>>Verified</option>
-                                    </select>
                                 </div>
                                 <div class="col-md-5">
                                     <button type="submit" class="btn btn-primary">
@@ -169,8 +165,8 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                                             <th>Member Name</th>
                                             <th>Member ID</th>
                                             <th>Email</th>
+                                            <th>Cause</th>
                                             <th>Amount</th>
-                                            <th>Status</th>
                                             <th>Date</th>
                                             <th>Notes</th>
                                             <th>Actions</th>
@@ -183,25 +179,19 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                                                 <td><?php echo htmlspecialchars($donation['member_full_name'] ?: $donation['name']); ?></td>
                                                 <td><?php echo htmlspecialchars($donation['member_sa_id'] ?: '-'); ?></td>
                                                 <td><?php echo htmlspecialchars($donation['email']); ?></td>
+                                                <td><?php echo htmlspecialchars($donation['cause_title'] ?: 'General / Unassigned'); ?></td>
                                                 <td><strong><?php echo formatCurrency($donation['amount']); ?></strong></td>
-                                                <td><?php echo getStatusBadge($donation['status']); ?></td>
                                                 <td><?php echo formatDateShort($donation['donated_at']); ?></td>
                                                 <td><?php echo !empty($donation['notes']) ? '<i class="fas fa-sticky-note text-warning"></i>' : '-'; ?></td>
                                                 <td>
-                                                    <button 
-                                                        class="btn btn-sm btn-outline-primary" 
-                                                        data-bs-toggle="modal" 
+                                                    <button
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal"
                                                         data-bs-target="#editModal"
                                                         onclick="editDonation(<?php echo htmlspecialchars(json_encode($donation)); ?>)"
                                                     >
                                                         <i class="fas fa-edit"></i> Edit
                                                     </button>
-                                                    <form method="POST" action="handlers/delete_donation.php" style="display:inline;">
-                                                        <input type="hidden" name="id" value="<?php echo $donation['id']; ?>">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </button>
-                                                    </form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -228,30 +218,34 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
                 <form method="POST" action="handlers/update_donation.php">
                     <div class="modal-body">
                         <input type="hidden" id="editId" name="id">
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Name</label>
                             <input type="text" class="form-control" id="editName" name="name" required>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" id="editEmail" name="email" required>
                         </div>
-                        
+
+                        <div class="mb-3">
+                            <label class="form-label">Cause</label>
+                            <select class="form-select" id="editCauseId" name="cause_id">
+                                <option value="">General / Unassigned</option>
+                                <?php foreach ($causes as $cause): ?>
+                                    <option value="<?php echo (int) $cause['id']; ?>">
+                                        <?php echo htmlspecialchars($cause['title']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Amount</label>
                             <input type="number" step="0.01" class="form-control" id="editAmount" name="amount" required>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="editStatus" name="status" required>
-                                <option value="pending">Pending</option>
-                                <option value="verified">Verified</option>
-                            </select>
-                        </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Notes</label>
                             <textarea class="form-control" id="editNotes" name="notes" rows="3"></textarea>
@@ -273,8 +267,8 @@ $totalAmount = array_sum(array_column($donations, 'amount'));
             document.getElementById('editId').value = donation.id;
             document.getElementById('editName').value = donation.name;
             document.getElementById('editEmail').value = donation.email;
+            document.getElementById('editCauseId').value = donation.cause_id || '';
             document.getElementById('editAmount').value = donation.amount;
-            document.getElementById('editStatus').value = donation.status;
             document.getElementById('editNotes').value = donation.notes || '';
         }
     </script>

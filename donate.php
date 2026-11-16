@@ -1,8 +1,28 @@
 <?php
 require_once 'auth.php';
+require_once 'cause_repository.php';
+
+$requestedCauseId = filter_input(INPUT_GET, 'cause_id', FILTER_VALIDATE_INT);
+$selectedCause = null;
+
+if ($requestedCauseId && $requestedCauseId > 0) {
+    try {
+        $selectedCause = findActiveCauseById(getPDO(), (int) $requestedCauseId);
+        if ($selectedCause) {
+            $_SESSION['pending_cause_id'] = (int) $requestedCauseId;
+        }
+    } catch (Throwable $e) {
+        error_log('Select cause before login error: ' . $e->getMessage());
+    }
+}
 
 if (isLoggedIn()) {
-    header('Location: dashboard.php');
+    $targetCauseId = $selectedCause['id'] ?? ($_SESSION['pending_cause_id'] ?? null);
+    $target = 'donation.php';
+    if ($targetCauseId) {
+        $target .= '?cause_id=' . (int) $targetCauseId;
+    }
+    header('Location: ' . $target);
     exit;
 }
 ?>
@@ -86,7 +106,13 @@ if (isLoggedIn()) {
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
                         <h3 class="mb-4">Register or login to donate</h3>
-                        <p class="mb-4">To make a donation, you must first create an account and sign in. This ensures your donation history is saved and linked to your member profile.</p>
+                        <?php if ($selectedCause): ?>
+                            <div class="alert alert-info">
+                                You selected <strong><?php echo htmlspecialchars($selectedCause['title']); ?></strong>.
+                                We will keep this selection while you sign in.
+                            </div>
+                        <?php endif; ?>
+                        <p class="mb-4">To make a donation, first create an account or sign in. Your donation record will be linked to your member profile. No payment is processed in this version.</p>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <a href="register.php" class="btn btn-custom btn-block">Register</a>
@@ -96,7 +122,7 @@ if (isLoggedIn()) {
                             </div>
                         </div>
                         <hr>
-                        <p>If you already have an account, log in and you will be redirected to your dashboard where you can donate and review your history.</p>
+                        <p>Recorded donations are added to the cause total. No payment is processed in this version.</p>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,17 @@
+<?php
+require_once 'auth.php';
+require_once 'cause_repository.php';
+
+$causes = [];
+$causesError = '';
+
+try {
+    $causes = fetchActiveCauses(getPDO());
+} catch (Throwable $e) {
+    error_log('Website causes error: ' . $e->getMessage());
+    $causesError = 'Our cause totals are temporarily unavailable. Please try again shortly.';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -110,113 +124,57 @@
                 <p>Popular Causes</p>
                 <h2>Join us in making a difference right here at home</h2>
             </div>
-            <div class="owl-carousel causes-carousel">
-
-                <!-- Cause 1 -->
-                <div class="causes-item">
-                    <div class="causes-img">
-                        <img src="img/causes-1.jpg" alt="Image">
-                    </div>
-                    <div class="causes-progress">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
-                                <span>60%</span>
+            <?php if ($causesError): ?>
+                <div class="alert alert-warning text-center">
+                    <?php echo htmlspecialchars($causesError); ?>
+                </div>
+            <?php elseif (empty($causes)): ?>
+                <div class="alert alert-info text-center">No active causes are available right now.</div>
+            <?php else: ?>
+                <div class="owl-carousel causes-carousel">
+                    <?php foreach ($causes as $cause): ?>
+                        <?php
+                        $causeId = (int) $cause['id'];
+                        $progress = (float) $cause['progress'];
+                        $donateUrl = isLoggedIn()
+                            ? 'donation.php?cause_id=' . $causeId
+                            : 'donate.php?cause_id=' . $causeId;
+                        ?>
+                        <div class="causes-item">
+                            <div class="causes-img">
+                                <img
+                                    src="<?php echo htmlspecialchars($cause['image_url']); ?>"
+                                    alt="<?php echo htmlspecialchars($cause['title']); ?>"
+                                >
+                            </div>
+                            <div class="causes-progress">
+                                <div class="progress">
+                                    <div
+                                        class="progress-bar"
+                                        role="progressbar"
+                                        aria-valuenow="<?php echo htmlspecialchars((string) $progress); ?>"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100"
+                                    >
+                                        <span><?php echo number_format($progress, 0); ?>%</span>
+                                    </div>
+                                </div>
+                                <div class="progress-text">
+                                    <p><strong>Raised:</strong> R<?php echo number_format($cause['raised_amount'], 2, '.', ' '); ?></p>
+                                    <p><strong>Goal:</strong> R<?php echo number_format($cause['goal_amount'], 2, '.', ' '); ?></p>
+                                </div>
+                            </div>
+                            <div class="causes-text">
+                                <h3><?php echo htmlspecialchars($cause['title']); ?></h3>
+                                <p><?php echo htmlspecialchars($cause['description']); ?></p>
+                            </div>
+                            <div class="causes-btn">
+                                <a class="btn btn-custom" href="<?php echo htmlspecialchars($donateUrl); ?>">Donate Now</a>
                             </div>
                         </div>
-                        <div class="progress-text">
-                            <p><strong>Raised:</strong> R6 000</p>
-                            <p><strong>Goal:</strong> R10 000</p>
-                        </div>
-                    </div>
-                    <div class="causes-text">
-                        <h3>Feed A Hungry Child</h3>
-                        <p>Thousands of children in our community go to school on an empty stomach. Help us provide daily nutritious meals to keep them focused and healthy.</p>
-                    </div>
-                    <div class="causes-btn">
-                        <a class="btn btn-custom" href="#">Learn More</a>
-                        <a class="btn btn-custom" href="donate.php">Donate Now</a>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
-
-                <!-- Cause 2 -->
-                <div class="causes-item">
-                    <div class="causes-img">
-                        <img src="img/causes-2.jpg" alt="Image">
-                    </div>
-                    <div class="causes-progress">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
-                                <span>85%</span>
-                            </div>
-                        </div>
-                        <div class="progress-text">
-                            <p><strong>Raised:</strong> R8 500</p>
-                            <p><strong>Goal:</strong> R10 000</p>
-                        </div>
-                    </div>
-                    <div class="causes-text">
-                        <h3>Clean Water For All</h3>
-                        <p>Many families still lack access to safe drinking water. Your donation brings us closer to installing clean water facilities in communities that need them most.</p>
-                    </div>
-                    <div class="causes-btn">
-                        <a class="btn btn-custom" href="#">Learn More</a>
-                        <a class="btn btn-custom" href="donate.php">Donate Now</a>
-                    </div>
-                </div>
-
-                <!-- Cause 3 -->
-                <div class="causes-item">
-                    <div class="causes-img">
-                        <img src="img/causes-3.jpg" alt="Image">
-                    </div>
-                    <div class="causes-progress">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
-                                <span>70%</span>
-                            </div>
-                        </div>
-                        <div class="progress-text">
-                            <p><strong>Raised:</strong> R14 000</p>
-                            <p><strong>Goal:</strong> R20 000</p>
-                        </div>
-                    </div>
-                    <div class="causes-text">
-                        <h3>Education For Every Child</h3>
-                        <p>A lack of school supplies and resources should never stand between a child and their future. Help us equip learners with the tools they need to succeed.</p>
-                    </div>
-                    <div class="causes-btn">
-                        <a class="btn btn-custom" href="#">Learn More</a>
-                        <a class="btn btn-custom" href="donate.php">Donate Now</a>
-                    </div>
-                </div>
-
-                <!-- Cause 4 -->
-                <div class="causes-item">
-                    <div class="causes-img">
-                        <img src="img/causes-4.jpg" alt="Image">
-                    </div>
-                    <div class="causes-progress">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
-                                <span>30%</span>
-                            </div>
-                        </div>
-                        <div class="progress-text">
-                            <p><strong>Raised:</strong> R4 500</p>
-                            <p><strong>Goal:</strong> R15 000</p>
-                        </div>
-                    </div>
-                    <div class="causes-text">
-                        <h3>Safe Shelter For Families</h3>
-                        <p>No family should sleep without a roof over their heads. We are raising funds to expand our shelter facilities and offer more families a safe place to stay.</p>
-                    </div>
-                    <div class="causes-btn">
-                        <a class="btn btn-custom" href="#">Learn More</a>
-                        <a class="btn btn-custom" href="donate.php">Donate Now</a>
-                    </div>
-                </div>
-
-            </div>
+            <?php endif; ?>
         </div>
     </div>
     <!-- Causes End -->
