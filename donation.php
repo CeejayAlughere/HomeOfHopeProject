@@ -89,7 +89,7 @@ try {
                         <h3 class="mb-4">Make a donation</h3>
 
                         <div class="alert alert-info">
-                            Your donation record will be added to the cause total. No payment is processed in this version.
+                            Your donation record will be added to the cause total of your choice.
                         </div>
 
                         <?php if ($errorMessage): ?>
